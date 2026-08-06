@@ -1,0 +1,7 @@
+- Output either reads `.claude/tend/config.yaml` or explicitly notes it is running at core tier because no config exists.
+- Output identifies and fixes exactly one issue, not a batch/list of issues.
+- The fix's improvement is justified in one sentence citing a concrete mechanism (e.g. "removes O(n²) loop over game sessions", "collapses N traversals into one") — not a vague "improves performance" or "more efficient" claim.
+- The justification is stated as a static-inspection fact (complexity class, call count, or allocation count) — output does not cite profiling numbers, benchmark results, or "should be faster" intuition.
+- The diff shown is under the 50-line budget and does not touch a lockfile, CI config, `.env`, or project config file.
+- Output does not add or remove a dependency.
+- Output stops after showing the diff and finding block — no claim of committing or opening a PR.

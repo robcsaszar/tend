@@ -1,0 +1,5 @@
+- Output identifies exactly one candidate function, prioritizing a dependency-injection/mockable-dependency pattern before falling back to a plain pure function.
+- Output states it read an existing test file first to match this repo's runner and assertion style.
+- The new/updated test file contains both a happy-path test and a distinct edge/error-path test.
+- Output states it ran (or shows the output of) `node scripts/validate-test-shape.mjs` against the new test file.
+- No file under `src/lib/` (the function under test) is modified — only test files are touched.

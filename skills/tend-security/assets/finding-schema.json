@@ -1,0 +1,45 @@
+{
+  "$comment": "Single source of truth for the one finding tend-security reports per run. validate-finding.mjs reads this at runtime — do not duplicate these rules in prose. Unlike run-crucible's findings-schema.json (an array of findings), this schema describes exactly ONE finding object, matching SKILL.md's one-issue-per-run contract.",
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "severity": {
+        "type": "string",
+        "enum": ["CRITICAL", "HIGH", "MEDIUM", "ENHANCEMENT"],
+        "description": "Matches the priority ladder in references/scan-core.md."
+      },
+      "title": {
+        "type": "string",
+        "minLength": 8,
+        "description": "Short human-readable name of the vulnerability, e.g. 'Timing-unsafe HMAC comparison in verifyToken'."
+      },
+      "file": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Path to the vulnerable file, relative to repo root (e.g. 'src/lib/hmac.ts'). Must exist on disk."
+      },
+      "line": {
+        "type": "integer",
+        "minimum": 1,
+        "description": "1-indexed line number of the vulnerable code. Must be within the file's actual line count."
+      },
+      "exploit": {
+        "type": "string",
+        "minLength": 20,
+        "description": "Concrete exploit path — how an attacker triggers it. Not a restatement of the title."
+      },
+      "fix": {
+        "type": "string",
+        "minLength": 20,
+        "description": "The minimal fix applied, described specifically enough to verify against the diff."
+      },
+      "verify": {
+        "type": "string",
+        "minLength": 10,
+        "description": "How a reviewer confirms the fix — a command to run, a request to replay, a test to check."
+      }
+    },
+    "required": ["severity", "title", "file", "line", "exploit", "fix", "verify"],
+    "additionalProperties": false
+  }
+}

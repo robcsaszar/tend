@@ -1,0 +1,6 @@
+- Output loads the `auth` module reference pack content (references it correctly identifies a timing-safe comparison issue, not a generic "add tests" or unrelated suggestion).
+- The fix replaces the `!==`/`===` comparison with a timing-safe comparison (e.g. `crypto.timingSafeEqual`), not a cosmetic rename or comment-only change.
+- The fix (or accompanying explanation) accounts for a length check before the timing-safe comparison, since a naive `timingSafeEqual` call throws on mismatched buffer lengths.
+- Output does not also modify unrelated code (e.g. does not touch validation schemas or realtime broadcast code) — exactly one atomic change.
+- A code comment is added at the change site naming the security concern.
+- Output stops after presenting the diff — no commit or PR claimed.

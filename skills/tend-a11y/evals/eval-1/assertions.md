@@ -1,0 +1,5 @@
+- Output either reads `.claude/tend/config.yaml` or explicitly notes it is running at core tier because no config exists.
+- Output identifies and fixes exactly one issue, not a batch/list of issues.
+- The diff shown touches exactly one component/page file, within the stated size budget (≤50 lines markup / ≤10 lines pure copy).
+- The fix uses this repo's own component-library equivalent (or native semantic HTML) rather than a hand-rolled raw-HTML patch, when one exists.
+- Output stops after showing the diff — no claim of committing or opening a PR.

@@ -1,0 +1,7 @@
+- Output explicitly states it is running at core tier (no config found) and emits the "run `tend-onboard` to sharpen" hint once.
+- Output identifies and fixes exactly one issue, of kind `dead-code-removal` — not type-tightening or component-extraction.
+- The finding's evidence is grep-based proof of duplication across 2+ call sites/files (the `format.ts` inline copy and its 2 consumers, cross-referenced against `slug.ts`'s existing 3 consumers) — not a vague "this looks duplicated" claim.
+- The fix consolidates the duplicate: it migrates `format.ts`'s 2 consumers to import and call the existing `slugify()` from `slug.ts`, and removes the now-dead inline copy — not just a deletion with no migration, and not a rewrite of `slugify()` itself.
+- Output does not touch any file outside `src/lib/utils/` and its migrated consumers, and does not touch a lockfile, CI config, `.env`, or project config file.
+- Output runs (or describes running) `node scripts/validate-finding.mjs` against the finding before presenting it.
+- Output shows the diff and a finding block (kind, file:line, evidence, fix, verify) and stops — no claim of committing or opening a PR.

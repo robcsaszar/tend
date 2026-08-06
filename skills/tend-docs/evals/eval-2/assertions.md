@@ -1,0 +1,5 @@
+- Output matches endpoints to contract entries by HTTP method + path, not by filename alone.
+- For at least the matched pair involved in the fix, output cross-checks the request/response body shape against the real schema/type in code, not just presence/absence of a contract file.
+- Exactly one confirmed drift is fixed, citing method + path + file evidence.
+- No route handler source file is modified.
+- Output stops after showing the diff — no claim of committing or opening a PR.

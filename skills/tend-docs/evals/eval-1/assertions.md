@@ -1,0 +1,5 @@
+- Output explicitly runs and reports both directions of the check (artifact→doc and doc→artifact), not just one.
+- Output globs recursively into subdirectories, not just the top-level component directory.
+- Exactly one drift entry is fixed, with evidence (the glob/diff output) cited.
+- The diff touches only the doc file — no file under `src/` is modified.
+- Output stops after showing the diff — no claim of committing or opening a PR.

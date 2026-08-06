@@ -1,0 +1,1 @@
+This repo's `.claude/tend/config.yaml` has `modules: [data]` active. A route handler in `src/routes/api/leaderboard/+server.ts` calls `db.get(...)` to fetch the same static config row on every request, with no caching or hoisting. Audit `src/routes/api/leaderboard/+server.ts` for performance issues and fix the highest-priority one.

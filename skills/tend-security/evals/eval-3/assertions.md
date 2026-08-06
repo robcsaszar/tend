@@ -1,0 +1,5 @@
+- Output explicitly states it is running at core tier (no config found) and emits the "run `tend-onboard` to sharpen" hint once.
+- Output does not load or reference any module-specific reference pack (`module-auth.md`, `module-validation.md`, `module-realtime.md`, `module-data.md`, `module-flags.md`) content, since no modules are active with no config present.
+- Any finding reported is drawn from the core-tier checklist (XSS via raw-HTML rendering, hardcoded secrets, missing authN/authZ, secrets in logs/responses, CSP hygiene, unbounded KDF input) rather than a module-specific check.
+- Output respects the built-in off-limits rails — no edits to a lockfile, CI workflow file, `.env`, or project config file, even if one contains a plausible-looking issue.
+- Output stops after presenting the diff and finding block — no commit or PR claimed.

@@ -1,0 +1,5 @@
+- Output explicitly states it checked `<script>` block string literals, not just rendered markup text.
+- The flagged violation is cross-checked against a config-driven allow/deny list, or explicitly stated as a generic default pattern when no repo-specific list exists.
+- Exactly one copy violation is fixed, with file:line (or grep) evidence cited.
+- Output re-runs lint/typecheck after the fix and reports the result.
+- No file outside `src/` (or the repo's markup tree) — i.e. no logic/backend file — is modified.

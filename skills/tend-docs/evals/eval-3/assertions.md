@@ -1,0 +1,5 @@
+- Output identifies and reads a ground-truth source file (the actual implementation) before editing either doc.
+- Output explicitly states which doc was wrong and why, citing the ground-truth source as evidence.
+- Only the incorrect doc is edited — the correct one is left untouched.
+- The ground-truth source file itself is not modified.
+- Output stops after showing the diff — no claim of committing or opening a PR.

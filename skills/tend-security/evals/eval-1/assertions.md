@@ -1,0 +1,6 @@
+- Output either reads `.claude/tend/config.yaml` or explicitly notes it is running at core tier because no config exists.
+- Output identifies and fixes exactly one issue, not a batch/list of issues.
+- The finding is presented with all of: severity, exact file:line, a concrete exploit path, and the fix applied — not a vague "could be improved" note.
+- The diff shown is under the 50-line budget and does not touch a lockfile, CI config, `.env`, or project config file.
+- Output does not alter authentication or authorization logic — a genuine auth-logic issue is flagged/described rather than silently rewritten.
+- Output stops after showing the diff and finding block — no claim of committing or opening a PR.

@@ -1,0 +1,66 @@
+{
+  "$comment": "Single source of truth for the one finding tend-refactor reports per run. validate-finding.mjs reads this at runtime — do not duplicate these rules in prose. Unlike tend-security's finding-schema.json (one fixed shape), refactor covers three finding kinds (dead-code-removal, type-tightening, component-extraction) sharing one envelope; kind-specific rules beyond generic shape (e.g. 'component-extraction needs 2+ instances') are enforced in validate-finding.mjs as Layer 2 checks, the same way file-existence and line-range checks are, since this schema's interpreter has no conditional/if-then support.",
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "kind": {
+        "type": "string",
+        "enum": ["dead-code-removal", "type-tightening", "component-extraction"],
+        "description": "Which of the three scan-core.md sub-domains this finding belongs to."
+      },
+      "title": {
+        "type": "string",
+        "minLength": 8,
+        "description": "Short human-readable name of the change, e.g. 'Consolidate duplicated slugify() into src/lib/utils/slug.ts'."
+      },
+      "file": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Primary file the finding targets, relative to repo root. For dead-code-removal and type-tightening, the file containing the fix. For component-extraction, the new component file. Must exist on disk."
+      },
+      "line": {
+        "type": "integer",
+        "minimum": 1,
+        "description": "1-indexed primary line number — the fixed line for dead-code-removal/type-tightening, or the new component's first line for component-extraction. Must be within the file's actual line count."
+      },
+      "evidence": {
+        "type": "string",
+        "minLength": 20,
+        "description": "Proof the fix is mechanical, matching this finding's kind: for dead-code-removal, grep evidence of the duplicated/deprecated pattern across 2+ call sites; for type-tightening, the existing type/interface reused and why the shape is unambiguous from context (no guessing); for component-extraction, confirmation that every listed instance (not a sample) was read and what varies vs. what's structurally identical. Not a restatement of the title."
+      },
+      "fix": {
+        "type": "string",
+        "minLength": 20,
+        "description": "The minimal change applied, described specifically enough to verify against the diff."
+      },
+      "verify": {
+        "type": "string",
+        "minLength": 10,
+        "description": "How a reviewer confirms the fix — a command to run (typecheck/lint/tests), or a page/flow to check for identical rendering."
+      },
+      "instances": {
+        "type": "array",
+        "description": "Required (2+ entries) when kind is 'component-extraction': every call site replaced by the new component. Omit for the other two kinds.",
+        "items": {
+          "type": "object",
+          "properties": {
+            "file": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Path to a replaced call site, relative to repo root. Must exist on disk."
+            },
+            "line": {
+              "type": "integer",
+              "minimum": 1,
+              "description": "1-indexed line of the replaced markup in this instance's file."
+            }
+          },
+          "required": ["file", "line"],
+          "additionalProperties": false
+        }
+      }
+    },
+    "required": ["kind", "title", "file", "line", "evidence", "fix", "verify"],
+    "additionalProperties": false
+  }
+}

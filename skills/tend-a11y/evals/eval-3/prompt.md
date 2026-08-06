@@ -1,0 +1,1 @@
+Scan `src/routes/dashboard/` for accessibility issues. (The route's markup already uses the repo's component library correctly, has alt text, labels, and role="alert" on all async feedback — there is nothing left to fix.)

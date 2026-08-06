@@ -1,0 +1,6 @@
+- Output identifies the repeated-`$derived`-filters-over-the-same-array pattern (or another real, evidence-backed issue) with file:line evidence, not a vague "could be optimized" note.
+- Because the pattern recurs across `PlayerList.svelte`, `TeamRoster.svelte`, and `ScoreBoard.svelte`, output checks for sibling instances before finalizing which one to fix — it does not stop scanning at the first component without checking whether others share the pattern.
+- Output fixes exactly one component (the most representative/highest-impact instance) and, if siblings exist, notes them in the finding rather than silently ignoring them or fixing all three.
+- The fix consolidates the independent filters into a single-traversal pass (`$derived.by()` or equivalent) rather than leaving multiple independent re-traversals in the fixed file.
+- The fix's improvement is stated as one sentence citing a concrete mechanism (e.g. "collapses 3 traversals of players into 1") — no vague performance claim.
+- Output stops after showing the diff and finding block — no claim of committing or opening a PR.

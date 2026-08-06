@@ -1,0 +1,1 @@
+This repo's `.claude/tend/config.yaml` has `modules: [auth]` active. A local `verifyToken` function in `src/lib/hmac.ts` compares a submitted signature against the expected HMAC using `!==`. Audit `src/lib/hmac.ts` for security issues and fix the highest-priority one.

@@ -1,0 +1,7 @@
+- Output identifies and fixes exactly one issue, of kind `type-tightening` — not dead-code-removal or component-extraction.
+- The fix narrows `err: any` to the existing `AppError` type imported from `src/lib/types.ts` — it does not invent a new interface when one already fits, and does not leave the parameter as `any` with a comment instead of fixing it.
+- The evidence names `AppError` specifically as the reused type and explains why the shape is unambiguous from how `err` is used (`.message` access), not a guess.
+- The change is type-only: no runtime logic in `toMessage` (or anywhere else) is altered, and no test file is touched.
+- Output changes only `src/lib/api/handle-error.ts` for the actual fix (single-file-contained), but explicitly notes the sibling occurrence in `src/lib/sse/reconnect.ts`'s `logError` as a remaining instance of the same pattern rather than silently leaving it unmentioned or fixing both in one run.
+- Output runs (or describes running) `node scripts/validate-finding.mjs` against the finding before presenting it.
+- Output shows the diff and stops — no claim of committing or opening a PR.

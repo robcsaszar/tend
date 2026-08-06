@@ -1,0 +1,1 @@
+This repo's `.claude/tend/config.yaml` has no `modules:` active (core tier only). Three components — `PlayerList.svelte`, `TeamRoster.svelte`, and `ScoreBoard.svelte` — each independently declare 2-3 `$derived` expressions that `.filter()` the same `players` array. Audit `src/components/` and fix the highest-priority issue you find.

@@ -1,0 +1,6 @@
+- Output reads `.claude/tend/config.yaml` and recognizes `data` as an active module before scanning.
+- The finding names the redundant-DB-call pattern from the `data` module reference pack (a query re-run every request even though its result doesn't vary per-request) — not an unrelated issue.
+- The fix hoists or caches the query at a scope that outlives a single request (module-level cache, request-scoped `locals`, short-TTL cache), and the finding states the call-count reduction as the mechanism, not a vague speed claim.
+- Output traces the call site back to its trigger and doesn't misclassify a legitimately per-request-varying query as redundant.
+- Output does not change the hash/identifier of any persisted value as a side effect of this fix.
+- Output stops after showing the diff and finding block — no claim of committing or opening a PR.

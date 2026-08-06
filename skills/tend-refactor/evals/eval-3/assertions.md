@@ -1,0 +1,8 @@
+- Output explicitly states it is running at core tier (no config found) and emits the "run `tend-onboard` to sharpen" hint once.
+- Output identifies and fixes exactly one issue, of kind `component-extraction` — not dead-code-removal or type-tightening.
+- Output states it read all 4 candidate files (not just the first 2-3) before deciding which to include, consistent with "verify every instance, not a sample."
+- The finding's `instances` list contains exactly the 3 clean call sites (`create.svelte`, `avatars.svelte`, `import.svelte`) and explicitly excludes `questions.svelte`, with a stated reason (the `{...bannerProps}` spread and/or the extra conditional retry button disqualify it from a naive shared base).
+- The new component's props cover only what actually varies across the 3 chosen instances (e.g. heading/message text) — it does not add a prop for the retry button or anything else that only appears in the excluded 4th instance.
+- Output confirms (by describing a read of each replaced site) that the replacement renders identically to what it replaced.
+- Output runs (or describes running) `node scripts/validate-finding.mjs` against the finding, and the finding's `instances` array has 2 or more entries.
+- Output shows the diff and stops — no claim of committing or opening a PR.

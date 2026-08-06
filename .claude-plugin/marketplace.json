@@ -1,0 +1,15 @@
+{
+  "name": "tend",
+  "owner": {
+    "name": "Rob Csaszar",
+    "url": "https://nhg.design"
+  },
+  "plugins": [
+    {
+      "name": "robcsaszar-tend",
+      "source": "./",
+      "description": "Local, on-demand maintenance skills for SvelteKit + TypeScript repos: security, performance, refactoring, accessibility, and test-coverage scanners",
+      "version": "0.5.0"
+    }
+  ]
+}

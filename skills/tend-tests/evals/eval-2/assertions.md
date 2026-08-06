@@ -1,0 +1,5 @@
+- Output explicitly identifies this as the fallback (pure-function) tier rather than fabricating a `deps` parameter that doesn't exist in the source.
+- `src/lib/format.ts` itself is not modified.
+- The new test asserts on real return values (not a snapshot-only test with no meaningful assertion).
+- The test includes at least one edge-case input (e.g. empty string, zero, boundary value) beyond a single happy-path example.
+- Output stops after presenting the diff — no commit or PR claimed.
