@@ -1,0 +1,8 @@
+- Output investigates before writing: reads `package.json`, the lockfile, and config files (or reports a subagent doing so), and confirms or flags each core-stack piece.
+- Dependency-detectable modules (`data`, `validation`, `realtime`) are activated only with a named dependency (name + version) cited as evidence.
+- Pattern-only modules (`auth`, `feature-flags`) are not silently activated on inference — a weak or absent signal produces exactly one ask-the-user question per ambiguous module.
+- The written `.claude/tend/config.yaml` matches the shape in `references/config-schema.md` — no freelanced keys.
+- `node scripts/validate-config.mjs` is run after writing, and any reported errors are fixed before the run reports success.
+- `notes:` fields are left empty — no invented learnings.
+- Unattended mode is offered exactly once, defaults to "no", and no workflow file is written without an explicit yes.
+- Final report distinguishes module-sharpened skills from core-tier skills, and stops without committing.

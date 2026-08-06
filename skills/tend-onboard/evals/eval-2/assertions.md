@@ -1,0 +1,6 @@
+- Output detects the existing `.claude/tend/config.yaml` and does not overwrite it blindly — it shows a diff of current vs proposed and asks before replacing.
+- Hand-edited `off-limits` and `notes` entries from the existing config survive into the proposed config (merge/update, not clobber).
+- Module changes are justified by fresh evidence from the re-investigation, not carried over on memory.
+- An existing `.github/workflows/tend-sweep.yml` is not rewritten without showing its current cadence against the template's and confirming first.
+- The validator is re-run on the updated config before the run reports success.
+- Output stops without committing.

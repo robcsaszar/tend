@@ -1,0 +1,208 @@
+# tend-sweep — unattended tend runs, with backpressure.
+#
+# TEMPLATE. This file ships inside the tend-onboard skill and is inert where
+# it lives. `/tend-onboard` offers to install it (with your chosen cadence)
+# at .github/workflows/tend-sweep.yml — or copy it there yourself.
+#
+# What it does NOT change: the skills. Each skill still runs exactly as
+# shipped — scan, fix one issue, verify, stop at the diff, never commit.
+# The "steward" step below is the thing that branches, commits, pushes, and
+# opens the PR, and the skill session's tool allowlist contains no git-write
+# and no gh, so the skill could not commit even if it tried. Delete the
+# steward step and nothing ever leaves the runner's working tree.
+#
+# Backpressure (the reason this isn't the unattended fleet tend replaced):
+#   - one skill per run, one fix per run
+#   - rotation advances past the most recent tend PR, whatever the cadence
+#   - a token-free preflight skips the run entirely when TEND_PR_CAP
+#     (default 2) tend-labeled PRs are already open, or when the day's
+#     skill already has an open PR
+#   - nothing merges itself: a human reviews and merges every PR
+#
+# Consuming-repo requirements:
+#   - tend skills present at .claude/skills/tend-*  (npx skills add
+#     robcsaszar/tend) — or uncomment the plugin lines below instead.
+#   - /tend-onboard run once locally, .claude/tend/config.yaml committed;
+#     otherwise every sweep runs at conservative core tier.
+#   - Secret: ANTHROPIC_API_KEY (or CLAUDE_CODE_OAUTH_TOKEN — see below).
+#   - Optional repo variable TEND_PR_CAP: max open tend PRs (default 2).
+#
+# Known limitation: PRs opened with the default GITHUB_TOKEN do not trigger
+# your own `on: pull_request` CI. If you need CI on tend PRs, store a
+# fine-grained PAT (contents + pull-requests: write) as TEND_GH_TOKEN and
+# use it in the checkout and steward steps instead of github.token.
+
+name: tend sweep
+
+on:
+  schedule:
+    - cron: "0 6 * * 1,3,5" # tend-onboard: cadence
+  workflow_dispatch:
+    inputs:
+      skill:
+        description: "Override the rotation for this run"
+        type: choice
+        required: false
+        options: [security, perf, refactor, a11y, tests, docs]
+
+concurrency:
+  group: tend-sweep
+  cancel-in-progress: false
+
+permissions:
+  contents: write # steward pushes the branch
+  pull-requests: write # preflight lists PRs; steward opens one
+
+jobs:
+  # Cheap gate: plain gh calls, no checkout, no Claude, no API spend.
+  # If the cap is hit or the skill already has an open PR, the run ends here.
+  preflight:
+    runs-on: ubuntu-latest
+    outputs:
+      run: ${{ steps.gate.outputs.run }}
+      skill: ${{ steps.gate.outputs.skill }}
+      branch: ${{ steps.gate.outputs.branch }}
+    steps:
+      - id: gate
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CAP: ${{ vars.TEND_PR_CAP }}
+          OVERRIDE: ${{ inputs.skill }}
+        run: |
+          set -euo pipefail
+          echo "run=false" >> "$GITHUB_OUTPUT" # default; overwritten on pass
+          CAP="${CAP:-2}"
+
+          open=$(gh pr list --repo "$GITHUB_REPOSITORY" --label tend --state open \
+            --json number --jq 'length')
+          if [ "$open" -ge "$CAP" ]; then
+            echo "::notice::$open open tend PR(s) >= cap $CAP — skipping; review the backlog first"
+            exit 0
+          fi
+
+          # Rotation: advance past the most recent tend PR (open, merged, or
+          # closed), so the cycle self-paces under any cron cadence.
+          # tend-docs is dispatch-only; tend-onboard is interactive and never
+          # runs unattended.
+          cycle=(security perf refactor a11y tests)
+          skill=security
+          last=$(gh pr list --repo "$GITHUB_REPOSITORY" --label tend --state all \
+            --limit 1 --json headRefName --jq '.[0].headRefName // empty')
+          if [ -n "$last" ]; then
+            prev="${last#tend/}"
+            prev="${prev%%-*}"
+            for i in "${!cycle[@]}"; do
+              if [ "${cycle[$i]}" = "$prev" ]; then
+                skill="${cycle[$(((i + 1) % 5))]}"
+                break
+              fi
+            done
+          fi
+          if [ -n "$OVERRIDE" ]; then
+            skill="$OVERRIDE"
+          fi
+
+          dup=$(gh pr list --repo "$GITHUB_REPOSITORY" --label tend --state open \
+            --json headRefName \
+            --jq "[.[] | select(.headRefName | startswith(\"tend/$skill-\"))] | length")
+          if [ "$dup" -gt 0 ]; then
+            echo "::notice::an open tend/$skill-* PR already exists — skipping to avoid a duplicate finding"
+            exit 0
+          fi
+
+          {
+            echo "run=true"
+            echo "skill=$skill"
+            echo "branch=tend/$skill-$(date -u +%Y%m%d)-$GITHUB_RUN_ID"
+          } >> "$GITHUB_OUTPUT"
+
+  sweep:
+    needs: preflight
+    if: needs.preflight.outputs.run == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      # The skill's verify phase runs typecheck/lint/tests, so dependencies
+      # must be installed. Adapt these steps to your package manager.
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+
+      - name: Run the skill
+        id: tend
+        uses: anthropics/claude-code-action@v1 # consider pinning to a commit SHA
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          # Claude subscription instead of API billing:
+          # claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+
+          # The leading slash is load-bearing: it invokes the skill the same
+          # way a human does (a user-level slash command) — the only
+          # invocation path the skills allow (disable-model-invocation).
+          prompt: "/tend-${{ needs.preflight.outputs.skill }}"
+
+          # If skills are NOT vendored under .claude/skills/, install the
+          # pack as a plugin for this run instead. Note the command may then
+          # be namespaced: /robcsaszar-tend:tend-<skill>.
+          # plugin_marketplaces: https://github.com/robcsaszar/tend.git
+          # plugins: robcsaszar-tend@tend
+
+          # Note what is absent: no git write, no gh. Only the steward step
+          # below can commit or open a PR.
+          claude_args: |
+            --allowedTools "Read,Glob,Grep,Edit,Write,Bash(pnpm *),Bash(npx *),Bash(node *),Bash(git status*),Bash(git diff*),Bash(git log*)"
+            --max-turns 50
+
+      - name: Steward — branch, commit, push, open PR
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SKILL: ${{ needs.preflight.outputs.skill }}
+          BRANCH: ${{ needs.preflight.outputs.branch }}
+          EXECUTION_FILE: ${{ steps.tend.outputs.execution_file }}
+        run: |
+          set -euo pipefail
+          if [ -z "$(git status --porcelain)" ]; then
+            echo "::notice::tend-$SKILL found nothing to fix — no PR"
+            exit 0
+          fi
+          git config user.name "tend-sweep"
+          git config user.email "tend-sweep@users.noreply.github.com"
+          git checkout -b "$BRANCH"
+          git add -A
+          git commit -m "fix(tend-$SKILL): unattended sweep $(date -u +%Y-%m-%d)"
+          git push origin "$BRANCH"
+
+          # PR body: the skill's own finding/verification report, pulled
+          # from the execution log; diffstat fallback if extraction fails.
+          report=""
+          if [ -n "${EXECUTION_FILE:-}" ] && [ -f "$EXECUTION_FILE" ]; then
+            report=$(jq -r '[.[] | select(.type=="assistant") | .message.content[]?
+              | select(.type=="text") | .text] | join("\n\n")' \
+              "$EXECUTION_FILE" 2>/dev/null | tail -c 60000 || true)
+          fi
+          if [ -z "$report" ]; then
+            report="_Report extraction failed — see the diff._"$'\n\n```\n'"$(git diff --stat HEAD~1)"$'\n```'
+          fi
+
+          gh label create tend --color 6b8f71 \
+            --description "Opened by the tend-sweep wrapper" --force
+          {
+            echo "Unattended \`tend-$SKILL\` run. The skill stopped at the diff, per its contract; this workflow committed the result and opened the PR."
+            echo
+            echo "## Skill report"
+            echo
+            echo "$report"
+            echo
+            echo "---"
+            echo "_One fix per run · rotation · open-PR cap. While this PR stays open, no new \`tend-$SKILL\` PR will be opened. Close without merging to reject the fix._"
+          } > "$RUNNER_TEMP/tend-pr-body.md"
+          gh pr create \
+            --title "tend-$SKILL sweep: $(date -u +%Y-%m-%d)" \
+            --body-file "$RUNNER_TEMP/tend-pr-body.md" \
+            --label tend \
+            --head "$BRANCH"

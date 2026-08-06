@@ -37,7 +37,7 @@ Re-run `tend-onboard` after a significant dependency or stack change; module act
 
 ## Usage
 
-Every skill in this pack is invoked explicitly, never automatically. Run `/tend-onboard`, `/tend-security`, `/tend-perf`, and so on by name. This is deliberate: a full pass is running each skill in turn yourself, not an unattended sweep. See `AGENTS.md` for why.
+Every skill in this pack is invoked explicitly, never automatically. Run `/tend-onboard`, `/tend-security`, `/tend-perf`, and so on by name. This is deliberate: a full pass is running each skill in turn yourself, not an unattended sweep. See `AGENTS.md` for why. For scheduled runs, don't loosen the skills — opt into the external wrapper that `tend-onboard` offers to install (see "Unattended use" below).
 
 ## Skills
 
@@ -68,6 +68,21 @@ cp -r skills/tend-security /path/to/project/.claude/skills/
 Every skill shares one shape: load config → triage → scan (stop at the first real hit) → fix (one atomic, verified change) → present the diff and stop. None of these skills commit or open a PR. You review and commit yourself. See each skill's `SKILL.md` for its full phase breakdown, and `tend-onboard/references/config-schema.md` for the config file this pack shares.
 
 **Known unverified item:** whether `npx skills add` copies a skill's full folder (`references/`, `scripts/`) or only `SKILL.md`. If you install a skill and its reference files or validator script are missing, install manually instead (see above) until this is confirmed.
+
+## Unattended use
+
+The skills never commit — that stays true. For scheduled runs there is an *external wrapper*: a GitHub Actions workflow template shipped inside the onboarding skill at [`skills/tend-onboard/assets/tend-sweep.yml`](skills/tend-onboard/assets/tend-sweep.yml). During `/tend-onboard` you're asked once whether you want it (default: no); on a yes, onboarding writes it to `.github/workflows/tend-sweep.yml` with your chosen cadence, and you commit it yourself. If you skipped onboarding, copy the asset there manually.
+
+On each scheduled run the workflow invokes exactly one skill — as the same `/tend-*` slash command you'd type yourself — and if the skill leaves a diff, the workflow (a deterministic shell step, not the skill and not a model) commits it to a `tend/<skill>-<date>` branch and opens a labeled PR. The skill session's tool allowlist in the workflow contains no `git commit`, `git push`, or `gh`, so "stop at the diff" is enforced mechanically, not requested politely.
+
+This is not a return to the unattended fleet this pack was built to replace. Backpressure is designed in:
+
+- **Rotation, not breadth** — one skill per run, one fix per run, cycling security → perf → refactor → a11y → tests by advancing past the most recent tend PR (so any cadence works). `tend-docs` is manual-dispatch only; `tend-onboard` never runs unattended.
+- **Open-PR cap** — before Claude ever starts, a token-free preflight counts open `tend`-labeled PRs; at the cap (default 2, repo variable `TEND_PR_CAP`) the run exits. An unreviewed backlog halts the machine.
+- **Per-skill duplicate guard** — while a `tend/<skill>-*` PR is open, that skill doesn't run again.
+- **Humans merge** — the workflow does nothing after opening the PR.
+
+Setup beyond the file itself: an `ANTHROPIC_API_KEY` (or `CLAUDE_CODE_OAUTH_TOKEN`) repo secret, and `/tend-onboard`'s `.claude/tend/config.yaml` committed so sweeps run sharpened rather than core-tier. Note: PRs opened with the default `GITHUB_TOKEN` won't trigger your own PR CI — see the template header for the PAT workaround.
 
 ## Safety
 
