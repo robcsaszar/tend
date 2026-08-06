@@ -11,11 +11,12 @@ This repo publishes the `tend` skill pack: local, on-demand maintenance skills f
 - Structured-findings skills (`tend-security`, `tend-refactor`, `tend-tests`) ship `scripts/validate-*.mjs` + `assets/*.json`. Diff-is-the-finding skills (`tend-perf`, `tend-a11y`, `tend-docs`) don't. Don't add a validator to one of these without updating this file's reasoning for why not.
 - Every skill ships `evals/eval-N/{prompt,assertions}.md`. See `ai-forge-eval` in the source repo (orakl) for the assertion format if extending.
 - Every skill sets `disable-model-invocation: true` in frontmatter: user-invoked only (`/tend-security`, etc.), never auto-triggered from conversation. This is the design decision behind the whole pack (single-skill, on-demand, human-paced runs replacing an unattended CI fleet that produced an 84-PR backlog). A skill that auto-triggers reintroduces the unattended-breadth failure mode the pack exists to avoid. New skills must set this flag too; don't add trigger-phrase language to a description once this flag is set, it's dead weight since auto-matching never runs.
+- `skills/tend-onboard/assets/tend-sweep.yml` is a copy-out template for consuming repos, installed (opt-in, cadence-adjusted) by `tend-onboard`'s Phase 4. `.github/workflows/` in *this* repo stays empty by design — never turn the template into a live workflow here.
 
 ## Judgment boundaries
 
 NEVER:
-- Never let a skill commit, branch, or open a PR. The pack's entire premise is working-tree-diff-and-stop; a skill that commits breaks the local review gate every other design decision depends on.
+- Never let a skill commit, branch, or open a PR. The pack's entire premise is working-tree-diff-and-stop; a skill that commits breaks the local review gate every other design decision depends on. The sweep template doesn't break this rule: its steward step commits *outside* any skill invocation, and the skill session's tool allowlist in the template must never gain git-write or `gh` tools.
 - Never have two skills read different shapes from `.claude/tend/config.yaml`. The schema lives in `tend-onboard/references/config-schema.md`; every other skill's Phase 0 must match it exactly, not a remembered approximation.
 
 ASK:
@@ -25,6 +26,7 @@ ASK:
 ALWAYS:
 - When a skill's `scripts/` directory gains, loses, or changes what a script does: update [`SAFETY.md`](SAFETY.md) in the same change.
 - When adding, removing, or renaming a skill: update the table in [`README.md`](README.md) in the same change.
+- When the sweep template or `tend-onboard`'s unattended-mode phase changes: update the README "Unattended use" section in the same change.
 
 ## Adding a skill
 

@@ -1,0 +1,6 @@
+- `auth` is not activated: no code signature exists and the user's statement is respected; at most one confirmation question is asked about it.
+- A valid, schema-conforming config is written even with an empty or near-empty `modules:` list, and the validator is run on it.
+- The report frames zero active modules as a valid, common outcome (core tier), not a failure.
+- The workflow is written to `.github/workflows/tend-sweep.yml` with a weekly cron substituted on the `# tend-onboard: cadence` line; no other line of the template is altered.
+- The user is told the remaining manual steps: add the API-key secret, optionally set `TEND_PR_CAP`, and commit the workflow file themselves.
+- `notes:` left empty; nothing is committed by the run.
