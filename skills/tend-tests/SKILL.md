@@ -1,7 +1,7 @@
 ---
 name: tend-tests
 disable-model-invocation: true
-description: Finds a function in this repo's logic/library layer with zero test coverage — prioritizing functions built with a dependency-injection or mockable-dependency pattern — and writes exactly one new test covering a happy path and an edge/error path, matching this repo's existing test runner, mock convention, and file-placement style. Use for closing test-coverage gaps incrementally. Not for e2e/integration/UI tests, migrating test runners, or fixing an already-failing test — that's a bug fix, not a coverage gap.
+description: "Use for closing test-coverage gaps incrementally — when a function in this repo's logic/library layer has zero test coverage and needs one focused unit test matching the repo's existing test runner, mock convention, and file-placement style. Covers a happy path and an edge/error path. Writes exactly one test per run. Not for e2e/integration/UI tests, migrating test runners, or fixing an already-failing test — that's a bug fix, not a coverage gap."
 ---
 
 # Tend Tests — *the weaver*
@@ -49,6 +49,8 @@ node scripts/validate-test-shape.mjs <test-file> <target-function-name>
 ```
 
 It checks that the test file actually references the target function and contains both a happy-path-shaped and an edge-case-shaped assertion. Fix anything it reports before moving on.
+
+If the validator **cannot run** (no `node`, script missing, usage error), continue but report the test as `⚠ unvalidated — validator unavailable: <reason>`. A **rejection** always blocks: fix the test, re-run. Both exit `1`; distinguish by the error text. Separately, if the repo has no test runner configured at all, stop and report that instead of inventing one — picking a runner is a project decision, not a coverage fix.
 
 Size budget: one function, one test file (new or appended-to) per run. **Never touch source files.** A coverage gap is not license to refactor the function under test — that's `tend-refactor`'s job. If the function is genuinely untestable as written (hidden module-level state, no seam at all), report that as the finding instead of changing it.
 

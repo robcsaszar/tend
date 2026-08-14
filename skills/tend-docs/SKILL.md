@@ -1,7 +1,7 @@
 ---
 name: tend-docs
 disable-model-invocation: true
-description: "Dogfood-only. Bidirectional documentation-drift auditor for repos that keep an explicit docs-vs-code reference convention — checks a reference doc against real code artifacts in both directions (doc entries with no matching artifact, and artifacts with no doc entry), cross-checks an API-contract/collection format (Bruno, Postman, OpenAPI, or similar) against real endpoints and their request/response schemas when one exists, and checks that multiple docs describing the same flow agree with each other and with a named ground-truth source file. Fixes one drift per run. Use for periodic doc-drift audits on repos with an explicit docs reference convention. Not for writing new documentation from scratch, general prose/style editing (see the writing skill), or repos with no doc-reference convention to check against."
+description: "Bidirectional documentation-drift auditor for repos that keep an explicit docs-vs-code reference convention. Use for periodic doc-drift audits — when a reference doc may list entries with no matching code artifact or omit artifacts that exist, when an API-contract collection (Bruno, Postman, OpenAPI, or similar) may disagree with real endpoints and their request/response schemas, or when several docs describing the same flow may contradict each other or a named ground-truth source file. Fixes one drift per run. Not for writing new documentation from scratch, general prose/style editing (see the writing skill), or repos with no doc-reference convention to check against."
 ---
 
 # Tend Docs — *the loremaster*

@@ -35,6 +35,8 @@ Write `.claude/tend/config.yaml` following [`references/config-schema.md`](refer
 
 Run `node scripts/validate-config.mjs .claude/tend/config.yaml` after writing. Fix any reported errors before finishing — a malformed config is worse than no config, because the other skills trust its shape without re-validating.
 
+If the validator **cannot run** (no `node`, script missing, usage error), do not leave an unchecked config on disk for the other skills to trust: either delete it and report that onboarding could not complete, or keep it and write `# ⚠ unvalidated — validator unavailable` as the first line of the file. A validator that runs and **rejects** always blocks; fix and re-run. Both exit `1`, so read the error text.
+
 ## Phase 4 — Offer unattended mode
 
 Ask the user once (same one-question posture as Phase 2 — never assume, never install silently):

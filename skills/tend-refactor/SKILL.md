@@ -55,6 +55,7 @@ Can't answer all three for the tier you're in → skip it, find another candidat
 
 - Re-run `typecheck` + `lint` + affected tests. Abort if your change introduces NEW failures (pre-existing ones aren't yours).
 - Run `node scripts/validate-finding.mjs` — machine-check the finding (file(s) exist, line(s) match, evidence present, instance count enforced for `component-extraction`).
+- If the validator **rejects** the finding, stop and fix the finding — never proceed on a rejection. If the validator **cannot run** (no `node`, script or schema missing, usage error), continue but label the finding `⚠ unvalidated — validator unavailable: <reason>` so it is never mistaken for a machine-checked one. Both exit `1`; distinguish by the error text.
 - Show the **diff** + a finding block (kind, file:line, evidence, fix, how to verify). **STOP — do not commit.** You review and commit.
 
 ## NEVER

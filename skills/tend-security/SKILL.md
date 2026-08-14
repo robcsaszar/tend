@@ -45,6 +45,7 @@ Answer all three before editing: (1) exact file:line, (2) concrete exploit path,
 
 - Re-run `typecheck` + `lint` + affected tests. Abort if your change introduces NEW failures (pre-existing ones aren't yours).
 - Run `node scripts/validate-finding.mjs` — machine-check the finding (file exists, line matches, evidence present).
+- If the validator **rejects** the finding, stop and fix the finding — never proceed on a rejection. If the validator **cannot run** (no `node`, script or schema missing, usage error), continue but label the finding `⚠ unvalidated — validator unavailable: <reason>`; an unvalidated security finding reported as validated is worse than no finding. Both exit `1`; distinguish by the error text.
 - Show the **diff** + a finding block (severity, file:line, exploit, fix, how to verify). **STOP — do not commit.** You review and commit.
 
 ## NEVER
