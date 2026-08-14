@@ -22,6 +22,8 @@ MANDATORY READ [`references/scan-core.md`](references/scan-core.md).
 - Identify the test file placement convention (co-located `*.test.ts` vs. a top-level `tests/`/`__tests__/` directory) and the import style in use (extensioned imports, path aliases).
 - Read 1–2 existing test files to learn the assertion style and — critically — whatever dependency-injection/mock convention this repo already uses. A named factory pair like `makeState`/`makeDeps` is *one example* of this convention, not the target itself — detect and match whatever this repo actually does, including "none yet" (see §2 fallback tier).
 
+If no test runner is configured at all, stop and report that — do not pick one. Selecting a test runner is a project decision, not a coverage fix.
+
 Completion criterion: test runner identified, an example existing test read, off-limits known.
 
 ## 2. Scan — priority order, stop at the first real hit
@@ -50,7 +52,7 @@ node scripts/validate-test-shape.mjs <test-file> <target-function-name>
 
 It checks that the test file actually references the target function and contains both a happy-path-shaped and an edge-case-shaped assertion. Fix anything it reports before moving on.
 
-If the validator **cannot run** (no `node`, script missing, usage error), continue but report the test as `⚠ unvalidated — validator unavailable: <reason>`. A **rejection** always blocks: fix the test, re-run. Both exit `1`; distinguish by the error text. Separately, if the repo has no test runner configured at all, stop and report that instead of inventing one — picking a runner is a project decision, not a coverage fix.
+If the validator **cannot run** (no `node`, script missing, usage error), continue but report the test as `⚠ unvalidated — validator unavailable: <reason>`. A **rejection** always blocks: fix the test, re-run. Both exit `1`; distinguish by the error text.
 
 Size budget: one function, one test file (new or appended-to) per run. **Never touch source files.** A coverage gap is not license to refactor the function under test — that's `tend-refactor`'s job. If the function is genuinely untestable as written (hidden module-level state, no seam at all), report that as the finding instead of changing it.
 
