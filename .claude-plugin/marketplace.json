@@ -9,7 +9,7 @@
       "name": "robcsaszar-tend",
       "source": "./",
       "description": "Local, on-demand maintenance skills for SvelteKit + TypeScript repos: security, performance, refactoring, accessibility, and test-coverage scanners",
-      "version": "0.6.0"
+      "version": "0.7.0"
     }
   ]
 }
