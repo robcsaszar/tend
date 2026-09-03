@@ -11,7 +11,7 @@ This repo publishes the `tend` skill pack: local, on-demand maintenance skills f
 - Structured-findings skills (`tend-security`, `tend-refactor`, `tend-tests`) ship `scripts/validate-*.mjs` + `assets/*.json`. Diff-is-the-finding skills (`tend-perf`, `tend-a11y`, `tend-docs`) don't. Don't add a validator to one of these without updating this file's reasoning for why not.
 - Every skill ships `evals/eval-N/{prompt,assertions}.md`. See `ai-forge-eval` in the source repo (orakl) for the assertion format if extending.
 - Every skill sets `disable-model-invocation: true` in frontmatter: user-invoked only (`/tend-security`, etc.), never auto-triggered from conversation. This is the design decision behind the whole pack (single-skill, on-demand, human-paced runs replacing an unattended CI fleet that produced an 84-PR backlog). A skill that auto-triggers reintroduces the unattended-breadth failure mode the pack exists to avoid. New skills must set this flag too; don't add trigger-phrase language to a description once this flag is set, it's dead weight since auto-matching never runs.
-- `skills/tend-onboard/assets/tend-sweep.yml` is a copy-out template for consuming repos, installed (opt-in, cadence-adjusted) by `tend-onboard`'s Phase 4. `.github/workflows/` in *this* repo stays empty by design — never turn the template into a live workflow here.
+- `skills/tend-onboard/assets/tend-sweep.yml` is a copy-out template for consuming repos, installed (opt-in, cadence-adjusted) by `tend-onboard`'s Phase 4. Never turn the template into a live workflow in *this* repo; the only workflow here is the Release workflow (see Releasing below).
 
 ## Judgment boundaries
 
@@ -35,3 +35,32 @@ ALWAYS:
 3. If it uses capability modules, gate each module's reference pack behind the config `modules:` list: never load a pack for an inactive module.
 4. Add `evals/` with 2-3 real eval cases before calling it done.
 5. Add a row to the table in `README.md`.
+
+## Releasing
+
+Releases are cut by the **Release** workflow (`.github/workflows/release.yml`), never by hand. It is a manual `workflow_dispatch` with one input, `tag`, and it releases the commit at the tip of the branch it is run on. Run it on `main`.
+
+The workflow, in order:
+1. Rejects a tag that is not `vX.Y.Z`, or that already exists.
+2. Fails unless `version` in `.claude-plugin/plugin.json` and `plugins[0].version` in `.claude-plugin/marketplace.json` both equal `X.Y.Z`.
+3. Takes the `## [X.Y.Z]` block from `CHANGELOG.md` as the release notes, and fails if there is none.
+4. Creates the tag at the checked-out commit and publishes the GitHub release with those notes.
+
+Nothing is created until every check passes, so a failed run leaves nothing to clean up.
+
+To prepare a release, in one PR:
+- Set the same new version in `.claude-plugin/plugin.json` and `.claude-plugin/marketplace.json`.
+- Add a `## [X.Y.Z] - YYYY-MM-DD` block at the top of `CHANGELOG.md`, and its `[X.Y.Z]: …` link reference at the bottom.
+- Merge to `main`.
+
+Then run the workflow on `main` with `tag=vX.Y.Z`, from the Actions tab (**Release → Run workflow**) or from a shell:
+
+```sh
+gh workflow run release.yml --ref main -f tag=vX.Y.Z
+```
+
+Afterwards, confirm the release exists and its notes match the changelog block.
+
+NEVER:
+- Never push a tag or create a release outside the workflow. A hand-made tag makes the workflow refuse that version, and a hand-written release skips the changelog and version checks.
+- Never work around a failed run by hand-writing notes or skipping a check. Fix the changelog or the manifests, merge, and re-run.
