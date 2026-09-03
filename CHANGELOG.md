@@ -29,5 +29,6 @@ All notable changes to this project are documented here. Format follows [Keep a 
 
 - Initial release: tend-onboard, tend-security, tend-perf, tend-refactor, tend-a11y, tend-tests, and tend-docs skills.
 
+[0.7.0]: https://github.com/robcsaszar/tend/releases/tag/v0.7.0
 [0.6.0]: https://github.com/robcsaszar/tend/releases/tag/v0.6.0
 [0.5.0]: https://github.com/robcsaszar/tend/releases/tag/v0.5.0
